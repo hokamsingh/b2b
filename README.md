@@ -44,6 +44,24 @@ We implement a **Shared-Nothing (at the leaf)** isolation model to guarantee per
 *   **Network Isolation**: Ingress Controllers use Host-based routing (`tenant.example.com`). Traffic is routed strictly to the specific Tenant Service Cluster IP.
 
 ## Scaling Strategy
+
+### Tenant Creation Flow (End-to-End)
+A strictly typed, verified flow ensuring correct infrastructure provisioning.
+
+1.  **API Trigger**: `POST /tenants` (Master Admin API)
+    -   Calls `createTenant` service.
+    -   Creates DB Record (`status='provisioning'`).
+2.  **Job Queue**: Pushes job to `provisioning-jobs` Redis queue.
+    -   Payload: `{ tenantId, subdomain, tier: 'micro' }`.
+3.  **Worker**: Consumes job and triggers **AWS CodeBuild**.
+    -   Passes environment variables: `TIER`, `CPU_LIMIT`.
+4.  **Provisioning (CodeBuild)**:
+    -   **Phase A (Terraform)**: Creates AWS Resources.
+        -   Uses `count = var.tier == "trial" ? 0 : 1` to skip RDS for trial tenants (Hybrid Cost).
+    -   **Phase B (Helm)**: Deploys Kubernetes Pods.
+        -   Sets `limits.cpu` based on tier.
+
+### Scaling Dimensions
 The platform is designed to scale in three dimensions:
 
 1.  **On-Demand Provisioning**:
