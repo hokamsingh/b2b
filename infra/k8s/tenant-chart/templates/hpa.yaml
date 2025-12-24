@@ -1,0 +1,21 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Values.tenantId }}-user-backend-hpa
+  labels:
+    app: user-backend
+    tenant: {{ .Values.tenantId }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Values.tenantId }}-user-backend
+  minReplicas: {{ .Values.userBackend.hpa.minReplicas | default 1 }}
+  maxReplicas: {{ .Values.userBackend.hpa.maxReplicas | default 10 }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.userBackend.hpa.targetCPUUtilizationPercentage | default 80 }}

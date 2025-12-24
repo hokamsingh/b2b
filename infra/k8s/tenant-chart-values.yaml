@@ -1,0 +1,30 @@
+# Default values for Tenant Chart (Micro Start)
+tenantId: ""
+isMaster: false
+
+global:
+  imageTag: latest
+
+userBackend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+adminBackend:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+scheduler:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi

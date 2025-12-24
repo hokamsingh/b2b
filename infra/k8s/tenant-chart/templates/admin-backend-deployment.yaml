@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenantId }}-admin-backend
+  labels:
+    app: admin-backend
+    tenant: {{ .Values.tenantId }}
+spec:
+  replicas: {{ .Values.adminBackend.replicas }}
+  selector:
+    matchLabels:
+      app: admin-backend
+      tenant: {{ .Values.tenantId }}
+  template:
+    metadata:
+      labels:
+        app: admin-backend
+        tenant: {{ .Values.tenantId }}
+    spec:
+      containers:
+        - name: admin-backend
+          image: "admin-backend:{{ .Values.global.imageTag }}"
+          ports:
+            - containerPort: 5000
+          resources:
+            {{- toYaml .Values.adminBackend.resources | nindent 12 }}
+          env:
+            - name: PORT
+              value: "5000"
+            - name: IS_MASTER
+              value: {{ .Values.isMaster | quote }}
+            - name: TENANT_ID
+              value: {{ .Values.tenantId | quote }}

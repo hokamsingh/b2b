@@ -1,0 +1,17 @@
+{
+  "name": "b2b-demo-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:all": "npm run build --workspaces --if-present",
+    "dev:all": "npm run dev --workspaces --if-present"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

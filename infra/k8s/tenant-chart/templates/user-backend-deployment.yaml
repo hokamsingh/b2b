@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenantId }}-user-backend
+  labels:
+    app: user-backend
+    tenant: {{ .Values.tenantId }}
+spec:
+  replicas: {{ .Values.userBackend.replicas }}
+  selector:
+    matchLabels:
+      app: user-backend
+      tenant: {{ .Values.tenantId }}
+  template:
+    metadata:
+      labels:
+        app: user-backend
+        tenant: {{ .Values.tenantId }}
+    spec:
+      containers:
+        - name: user-backend
+          image: "user-backend:{{ .Values.global.imageTag }}"
+          ports:
+            - containerPort: 5000
+          resources:
+            {{- toYaml .Values.userBackend.resources | nindent 12 }}
+          env:
+            - name: PORT
+              value: "5000"
+            - name: TENANT_ID
+              value: {{ .Values.tenantId | quote }}

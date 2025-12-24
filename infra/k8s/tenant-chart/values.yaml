@@ -1,0 +1,43 @@
+global:
+  imageTag: "latest"
+
+tenantId: "default"
+subdomain: "default"
+isMaster: "false"
+
+userBackend:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+  hpa:
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+adminBackend:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+scheduler:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "128Mi"
+
+userFrontend:
+  replicas: 1
+
+adminFrontend:
+  replicas: 1

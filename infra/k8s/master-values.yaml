@@ -1,0 +1,16 @@
+tenantId: "master"
+subdomain: "admin"
+isMaster: "true"
+
+adminBackend:
+  replicas: 1
+  resources:
+    limits:
+      cpu: "1000m" # Master needs more power for Provisioning/Analytics
+      memory: "512Mi"
+
+userBackend:
+  replicas: 1
+
+scheduler:
+  replicas: 1

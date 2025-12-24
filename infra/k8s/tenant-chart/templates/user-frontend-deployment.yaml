@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenantId }}-user-frontend
+  labels:
+    app: user-frontend
+    tenant: {{ .Values.tenantId }}
+spec:
+  replicas: {{ .Values.userFrontend.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: user-frontend
+      tenant: {{ .Values.tenantId }}
+  template:
+    metadata:
+      labels:
+        app: user-frontend
+        tenant: {{ .Values.tenantId }}
+    spec:
+      containers:
+        - name: user-frontend
+          image: "user-frontend:{{ .Values.global.imageTag }}"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_URL
+              value: "http://{{ .Values.tenantId }}-user-backend:5000"

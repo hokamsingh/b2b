@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenantId }}-admin-frontend
+  labels:
+    app: admin-frontend
+    tenant: {{ .Values.tenantId }}
+spec:
+  replicas: {{ .Values.adminFrontend.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: admin-frontend
+      tenant: {{ .Values.tenantId }}
+  template:
+    metadata:
+      labels:
+        app: admin-frontend
+        tenant: {{ .Values.tenantId }}
+    spec:
+      containers:
+        - name: admin-frontend
+          image: "admin-frontend:{{ .Values.global.imageTag }}"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_URL
+              value: "http://{{ .Values.tenantId }}-admin-backend:5000"

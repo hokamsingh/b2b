@@ -1,0 +1,56 @@
+version: 0.2
+
+env:
+  variables:
+    TF_VERSION: "1.5.0"
+  secrets-manager:
+    # Example: TF_VAR_db_password: "prod/db/password"
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing Terraform..."
+      - curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip
+      - unzip -o terraform.zip
+      - mv terraform /usr/bin/
+      - echo "Installing Helm..."
+      - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+  pre_build:
+    commands:
+      - echo "Validating Environment Variables..."
+      - |
+        if [ -z "$TENANT_ID" ] || [ -z "$SUBDOMAIN" ]; then
+          echo "Error: TENANT_ID and SUBDOMAIN must be provided."
+          exit 1
+        fi
+      - echo "Configuring Kubeconfig (EKS)..."
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+  build:
+    commands:
+      - echo "--- Starting Infrastructure Provisioning for Tenant: $TENANT_ID ---"
+      
+      # 1. Terraform (AWS Resources)
+      - echo "Step 1: Terraform Apply"
+      - cd infra/terraform/tenant-template
+      - terraform init
+      - terraform apply -auto-approve -var="tenant_id=$TENANT_ID" -var="subdomain=$SUBDOMAIN" -var="tier=$TIER"
+      - cd -
+
+      # 2. Helm (Kubernetes Pods)
+      - echo "Step 2: Helm Install"
+      - cd infra/k8s
+      - |
+        helm upgrade --install tenant-$TENANT_ID ./tenant-chart \
+          --set tenantId=$TENANT_ID \
+          --set subdomain=$SUBDOMAIN \
+          --set userBackend.resources.limits.cpu=$CPU_LIMIT \
+          --namespace default \
+          --wait
+
+  post_build:
+    commands:
+      - echo "Provisioning Completed Successfully for $SUBDOMAIN"

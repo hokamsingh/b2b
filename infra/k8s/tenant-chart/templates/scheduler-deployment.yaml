@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.tenantId }}-scheduler
+  labels:
+    app: scheduler
+    tenant: {{ .Values.tenantId }}
+spec:
+  replicas: {{ .Values.scheduler.replicas }}
+  selector:
+    matchLabels:
+      app: scheduler
+      tenant: {{ .Values.tenantId }}
+  template:
+    metadata:
+      labels:
+        app: scheduler
+        tenant: {{ .Values.tenantId }}
+    spec:
+      containers:
+        - name: scheduler
+          image: "job-scheduler:{{ .Values.global.imageTag }}"
+          resources:
+            {{- toYaml .Values.scheduler.resources | nindent 12 }}
+          env:
+            - name: TENANT_ID
+              value: {{ .Values.tenantId | quote }}
