@@ -8,6 +8,11 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const IS_MASTER = process.env.IS_MASTER === 'true';
 
+import { connectDB } from './db';
+
+// Connect to Database
+connectDB();
+
 app.use(cors());
 app.use(express.json());
 
@@ -36,7 +41,7 @@ if (IS_MASTER) {
     startAnalyticsConsumer().catch(err => console.error('Failed to start Analytics Consumer', err));
 
     // Start Provisioning Worker
-    const { startProvisioningWorker } = require('./master/provisioning.worker');
+    const startProvisioningWorker = require('./master/provisioning.worker');
     startProvisioningWorker();
 }
 
